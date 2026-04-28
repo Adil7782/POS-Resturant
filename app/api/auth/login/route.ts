@@ -36,24 +36,24 @@ export async function POST(
 
         // Sign the token
         const token = sign(
-            { email, role: existingUserByEmail.role },
+            { email, role: existingUserByEmail.role ,name:existingUserByEmail.name},
             secret,
             { expiresIn: MAX_AGE },
         );
 
         // Serialize the token to cookie
-        const serialized = serialize("AUTH_TOKEN", token, {
-            httpOnly: true,
+        const serialized = serialize("token", token, {
+             httpOnly: true,
             secure: true,
             sameSite: "strict",
             maxAge: MAX_AGE,
             path: "/",
         });
 
-        return new NextResponse("Successfully authenticated!", { 
-            status: 200,
-            headers: { "Set-Cookie": serialized },
-        });
+        return NextResponse.json(
+            { role: existingUserByEmail.role, message: "Successfully authenticated!" },
+            { status: 200, headers: { "Set-Cookie": serialized } }
+        );
         
     } catch (error) {
         console.error("[SIGNIN_ERROR]", error);

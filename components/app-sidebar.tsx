@@ -1,9 +1,10 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
+import axios from "axios"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { TeamSwitcher } from "@/components/team-switcher"
 import {
@@ -13,180 +14,126 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, TerminalSquareIcon, BotIcon, BookOpenIcon, Settings2Icon, FrameIcon, PieChartIcon, MapIcon } from "lucide-react"
+import {
+  GalleryVerticalEndIcon,
+  LayoutDashboardIcon,
+  ShoppingCartIcon,
+  UtensilsIcon,
+  UsersIcon,
+  BarChart3Icon,
+  ClipboardListIcon,
+  UserCircleIcon,
+  ReceiptIcon,
+} from "lucide-react"
 
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+const adminNav = [
+  {
+    title: "Dashboard",
+    url: "/dashboard/ADMIN",
+    icon: <LayoutDashboardIcon />,
+    isActive: true,
+    items: [
+      { title: "Overview", url: "/dashboard/ADMIN" },
+    ],
   },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: (
-        <GalleryVerticalEndIcon
-        />
-      ),
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: (
-        <AudioLinesIcon
-        />
-      ),
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: (
-        <TerminalIcon
-        />
-      ),
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: (
-        <TerminalSquareIcon
-        />
-      ),
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: (
-        <BotIcon
-        />
-      ),
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: (
-        <BookOpenIcon
-        />
-      ),
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: (
-        <Settings2Icon
-        />
-      ),
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: (
-        <FrameIcon
-        />
-      ),
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: (
-        <PieChartIcon
-        />
-      ),
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: (
-        <MapIcon
-        />
-      ),
-    },
-  ],
+  {
+    title: "Orders",
+    url: "#",
+    icon: <ShoppingCartIcon />,
+    items: [
+      { title: "All Orders", url: "/dashboard/ADMIN/orders" },
+      { title: "New Order", url: "/dashboard/ADMIN/orders/new" },
+    ],
+  },
+  {
+    title: "Menu",
+    url: "#",
+    icon: <UtensilsIcon />,
+    items: [
+      { title: "Items", url: "/dashboard/ADMIN/menu" },
+      { title: "Categories", url: "/dashboard/ADMIN/menu/categories" },
+    ],
+  },
+  {
+    title: "Users",
+    url: "#",
+    icon: <UsersIcon />,
+    items: [
+      { title: "All Users", url: "/dashboard/ADMIN/users" },
+      { title: "Add User", url: "/dashboard/ADMIN/users/new" },
+    ],
+  },
+  {
+    title: "Reports",
+    url: "#",
+    icon: <BarChart3Icon />,
+    items: [
+      { title: "Sales", url: "/dashboard/ADMIN/reports/sales" },
+      { title: "Daily Summary", url: "/dashboard/ADMIN/reports/daily" },
+    ],
+  },
+]
+
+const cashierNav = [
+  {
+    title: "POS",
+    url: "/dashboard/cashier",
+    icon: <ReceiptIcon />,
+    isActive: true,
+    items: [
+      { title: "New Order", url: "/dashboard/cashier" },
+    ],
+  },
+  {
+    title: "Orders",
+    url: "#",
+    icon: <ClipboardListIcon />,
+    items: [
+      { title: "My Orders", url: "/dashboard/cashier/orders" },
+      { title: "Order History", url: "/dashboard/cashier/orders/history" },
+    ],
+  },
+  {
+    title: "Profile",
+    url: "#",
+    icon: <UserCircleIcon />,
+    items: [
+      { title: "My Account", url: "/dashboard/cashier/profile" },
+    ],
+  },
+]
+
+const teams = [
+  {
+    name: "Restaurant POS",
+    logo: <GalleryVerticalEndIcon />,
+    plan: "Enterprise",
+  },
+]
+
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: { name: string; email: string; role: string }
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ user, ...props }: AppSidebarProps) {
+  const navUser = {
+    name: user.name || "",
+    email: user.email || "",
+    avatar: "/avatars/shadcn.jpg",
+  }
+
+  const navItems = user.role === "ADMIN" ? adminNav : cashierNav
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <TeamSwitcher teams={teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={navUser} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
