@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-
+import { revalidatePath } from "next/cache"; // Move this here
 import { getUserFromToken } from '@/lib/getuser';
-import { addTransactionItem, createTransaction, updateInventory } from '@/lib/transactions';
-
+import { processCheckout } from '@/lib/transactions';
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserFromToken();
-    // console.log(user)
+    
     if (!user || user.role !== 'CASHIER') {
       return NextResponse.json(
         { message: 'Unauthorized' },
@@ -24,28 +22,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-// console.log(user)
-    // Create transaction
-    const transaction = await createTransaction(user.id, total, paymentMethod);
 
-    // Add items to transaction and update inventory
-    for (const item of items) {
-      await addTransactionItem(
-        transaction.id,
-        item.product.id,
-        item.quantity,
-        item.product.price
-      );
+    // Process the entire checkout in one fast, safe database transaction
+    const transaction = await processCheckout(user.id, items, total, paymentMethod);
 
-      // Reduce inventory
-      await updateInventory(
-        item.product.id,
-        -item.quantity,
-        'SALE',
-        user.id,
-        `Sale transaction #${transaction.id}`
-      );
-    }
+    // Revalidate the cache ONCE after everything is successfully written to the DB
+    revalidatePath('/dashboard/cashier/pos');
 
     return NextResponse.json(
       { 

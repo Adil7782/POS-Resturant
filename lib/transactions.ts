@@ -1,83 +1,83 @@
 import { revalidatePath } from "next/cache";
 import prisma from "./prisma";
 
-export async function createTransaction(userId: number, total: number, paymentMethod: string) {
-  const transactionId = `ORD-${new Date().getTime()}`;
-  const subtotal = total;
-  const tax = 0;
+export async function processCheckout(userId: number, items: any[], total: number, paymentMethod: string) {
+  const transactionIdStr = `ORD-${new Date().getTime()}`;
 
-  return prisma.transaction.create({
-    data: {
-      transactionId,
-      subtotal,
-      tax,
-      total,
-      paymentMethod,
-      status: 'completed',
-      cashierId: userId,
-    }
-  });
-}
-
-
-export async function addTransactionItem(transactionId: number, productId: number, quantity: number, unitPrice: number) {
-  const lineTotal = quantity * unitPrice;
-  return prisma.transactionItem.create({
-    data: {
-      transactionId,
-      productId,
-      quantity,
-      unitPrice,
-      lineTotal,
-    }
-  });
-}
-
-export async function updateInventory(productId: number, quantityChange: number, changeType: string, userId: number, notes?: string) {
-  // Update inventory quantity
-  await prisma.inventory.update({
-    where: { productId },
-    data: {
-      quantityOnHand: { increment: quantityChange }
-    }
-  });
-
-  // Log the change
-  await prisma.inventoryLog.create({
-    data: {
-      productId,
-      quantityChange,
-      type: changeType,
-      notes: notes || null,
-      referenceId: userId.toString(), 
-    }
-  });
-
-  // Check if stock is low
-  const inv = await prisma.inventory.findUnique({
-    where: { productId },
-    include: { product: true }
-  });
-
-  if (inv && inv.quantityOnHand < inv.reorderLevel) {
-    const existingAlert = await prisma.stockAlert.findFirst({
-      where: {
-        productId,
-        alertType: 'LOW_STOCK',
-        status: 'active'
+  // Execute EVERYTHING in a single interactive transaction
+  return await prisma.$transaction(async (tx) => {
+    
+    // 1. Create the main transaction record
+    const transaction = await tx.transaction.create({
+      data: {
+        transactionId: transactionIdStr,
+        subtotal: total,
+        tax: 0,
+        total,
+        paymentMethod,
+        status: 'completed',
+        cashierId: userId,
       }
     });
 
-    if (!existingAlert) {
-      await prisma.stockAlert.create({
+    // 2. Prepare items for bulk insert
+    const transactionItemsData = items.map(item => ({
+      transactionId: transaction.id,
+      productId: item.product.id,
+      quantity: item.quantity,
+      unitPrice: item.product.price,
+      lineTotal: item.quantity * item.product.price,
+    }));
+
+    // 3. Bulk insert ALL transaction items at once (1 query instead of N queries)
+    await tx.transactionItem.createMany({
+      data: transactionItemsData
+    });
+
+    // 4. Update inventory and logs
+    for (const item of items) {
+      // update() returns the new record, saving us a findUnique() call later
+      const updatedInv = await tx.inventory.update({
+        where: { productId: item.product.id },
+        data: { quantityOnHand: { decrement: item.quantity } } 
+      });
+
+      // Create log
+      await tx.inventoryLog.create({
         data: {
-          productId,
-          alertType: 'LOW_STOCK',
-          status: 'active'
+          productId: item.product.id,
+          quantityChange: -item.quantity,
+          type: 'SALE',
+          notes: `Sale transaction #${transaction.id}`,
+          referenceId: userId.toString(), 
         }
       });
-    }
-  }
-    revalidatePath('/dashboard/cashier/pos');
 
-}
+      // Check stock alert using the updatedInv variable we already have
+      if (updatedInv.quantityOnHand < updatedInv.reorderLevel) {
+        const existingAlert = await tx.stockAlert.findFirst({
+          where: {
+            productId: item.product.id,
+            alertType: 'LOW_STOCK',
+            status: 'active'
+          }
+        });
+
+        if (!existingAlert) {
+          await tx.stockAlert.create({
+            data: {
+              productId: item.product.id,
+              alertType: 'LOW_STOCK',
+              status: 'active'
+            }
+          });
+        }
+      }
+    }
+
+    return transaction;
+  }, {
+    maxWait: 5000, // Wait up to 5 seconds for a connection (default is 2)
+    timeout: 10000, // Allow up to 10 seconds for the transaction to finish (default is 5)
+  });
+} 
