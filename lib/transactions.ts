@@ -4,7 +4,6 @@ import prisma from "./prisma";
 export async function processCheckout(userId: number, items: any[], total: number, paymentMethod: string) {
   const transactionIdStr = `ORD-${new Date().getTime()}`;
 
-  // Execute EVERYTHING in a single interactive transaction
   return await prisma.$transaction(async (tx) => {
     
     // 1. Create the main transaction record
@@ -25,18 +24,23 @@ export async function processCheckout(userId: number, items: any[], total: numbe
       transactionId: transaction.id,
       productId: item.product.id,
       quantity: item.quantity,
-      unitPrice: item.product.price,
+      unitPrice: item.product.price,  
       lineTotal: item.quantity * item.product.price,
     }));
 
-    // 3. Bulk insert ALL transaction items at once (1 query instead of N queries)
+    // 3. Bulk insert ALL items (This stays the same, we record everything sold)
     await tx.transactionItem.createMany({
       data: transactionItemsData
     });
 
-    // 4. Update inventory and logs
+    // 4. Update inventory and logs ONLY for tracked items
     for (const item of items) {
-      // update() returns the new record, saving us a findUnique() call later
+      // CHECK: Is this specific product marked for tracking?
+      if (!item.product.isInventoryTracked) {
+        continue; // Skip the rest of the loop for this item
+      }
+
+      // Update inventory
       const updatedInv = await tx.inventory.update({
         where: { productId: item.product.id },
         data: { quantityOnHand: { decrement: item.quantity } } 
@@ -49,11 +53,11 @@ export async function processCheckout(userId: number, items: any[], total: numbe
           quantityChange: -item.quantity,
           type: 'SALE',
           notes: `Sale transaction #${transaction.id}`,
-          referenceId: userId.toString(), 
+          referenceId: transaction.id.toString(), 
         }
       });
 
-      // Check stock alert using the updatedInv variable we already have
+      // Check stock alert
       if (updatedInv.quantityOnHand < updatedInv.reorderLevel) {
         const existingAlert = await tx.stockAlert.findFirst({
           where: {
@@ -77,7 +81,7 @@ export async function processCheckout(userId: number, items: any[], total: numbe
 
     return transaction;
   }, {
-    maxWait: 5000, // Wait up to 5 seconds for a connection (default is 2)
-    timeout: 10000, // Allow up to 10 seconds for the transaction to finish (default is 5)
+    maxWait: 5000,
+    timeout: 10000,
   });
-} 
+}
