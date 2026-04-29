@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 
 export default async function DashboardRootPage() {
   const user = await getUserFromToken()
-  console.log("uuuuuuuuuser", user)
+  // console.log("uuuuuuuuuser", user)
   if (!user) {
     redirect("/login")
   }

@@ -9,8 +9,11 @@ export async function getUserFromToken() {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
 
+        // console.log(decoded)
+
+        
     return {
-      id: decoded.userId,
+      id: decoded.id,
       name: decoded.name,
       email: decoded.email,
       role: decoded.role,

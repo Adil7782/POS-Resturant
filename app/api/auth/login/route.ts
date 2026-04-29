@@ -19,6 +19,7 @@ export async function POST(
                 email
             }
         });
+        
        
         if (!existingUserByEmail) {
             return new NextResponse("Email does not exist!", { status: 409 });
@@ -36,7 +37,7 @@ export async function POST(
 
         // Sign the token
         const token = sign(
-            { email, role: existingUserByEmail.role ,name:existingUserByEmail.name},
+            { email, role: existingUserByEmail.role ,name:existingUserByEmail.name,id:existingUserByEmail.id},
             secret,
             { expiresIn: MAX_AGE },
         );
@@ -49,6 +50,8 @@ export async function POST(
             maxAge: MAX_AGE,
             path: "/",
         });
+        console.log("user data", existingUserByEmail)
+
 
         return NextResponse.json(
             { role: existingUserByEmail.role, message: "Successfully authenticated!" },

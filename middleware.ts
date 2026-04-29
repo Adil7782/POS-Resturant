@@ -5,7 +5,7 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value; // ⚠️ must match your login API
   const { pathname } = req.nextUrl;
 
-  console.log("TOKEN:", token);
+  // console.log("TOKEN:", token);
 
   // If no token → redirect to login
   if (!token) {

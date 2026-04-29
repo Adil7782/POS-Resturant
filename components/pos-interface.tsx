@@ -11,6 +11,8 @@ import { ShoppingCart, Plus, Minus, Trash2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 // import CheckoutModal from './checkout-modal';
 import { Product } from '@/app/generated/prisma/client';
+import axios from 'axios';
+import CheckoutModal from './checkout-modal';
 // import { Product } from '@/lib/generated/prisma/client';
 
 
@@ -98,32 +100,34 @@ export default function POSInterface({ products, userId }: POSInterfaceProps) {
   };
 
   const handleCheckout = async (paymentMethod: string) => {
+    // console.log("-------------------------")
+    // console.log(cart.length)
     if (cart.length === 0) {
       toast.error('Cart is empty');
       return;
     }
 
     try {
-      const response = await fetch('/api/pos/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          items: cart,
-          paymentMethod,
-          total: cartTotals.total
-        })
+
+      const res = await axios.post("/api/pos/checkout", {
+        userId,
+        items: cart,
+        paymentMethod,
+        total: cartTotals.total
       });
 
 
-      
 
-      if (!response.ok) {
+
+
+
+
+      if (res.status !== 200) {
         throw new Error('Checkout failed');
       }
 
-      const data = await response.json();
-      toast.success(`Transaction #${data.transactionId} completed!`);
+      // const data = await res.data;
+      toast.success(`Transaction #${res.data.transactionId} completed!`);
       setCart([]);
       setIsCheckoutOpen(false);
     } catch (error) {
@@ -267,12 +271,12 @@ export default function POSInterface({ products, userId }: POSInterfaceProps) {
         <div className="space-y-2">
           {cart.length > 0 && (
             <>
-              {/* <CheckoutModal
+              <CheckoutModal
                 total={cartTotals.total}
                 onCheckout={handleCheckout}
                 isOpen={isCheckoutOpen}
                 onOpenChange={setIsCheckoutOpen}
-              /> */}
+              />
               <Button
                 variant="outline"
                 className="w-full"
