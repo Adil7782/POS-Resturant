@@ -76,12 +76,12 @@ const adminNav = [
 
 const cashierNav = [
   {
-    title: "POS",
-    url: "/dashboard/cashier",
+    title: "Dashboard",
+    url: "/dashboard/cashier/pos",
     icon: <ReceiptIcon />,
     isActive: true,
     items: [
-      { title: "New Order", url: "/dashboard/cashier" },
+      { title: "POS", url: "/dashboard/cashier/pos" },
     ],
   },
   {
