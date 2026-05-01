@@ -1,21 +1,7 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+
 import { redirect } from "next/navigation"
 import { getUserFromToken } from "@/lib/getuser"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+export const dynamic = "force-dynamic";
 
 import prisma from '@/lib/prisma';
 import DashboardOverview from "@/components/dashboard-overview"
@@ -52,7 +38,7 @@ export default async function DashboardPage() {
 
       // Limit transactions to the most recent 10 and sort by date
       prisma.transaction.findMany({
-        take: 10,
+        take: 5,
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
