@@ -37,12 +37,12 @@ const adminNav = [
     ],
   },
   {
-    title: "Orders",
+    title: "Inventory",
     url: "#",
     icon: <ShoppingCartIcon />,
     items: [
-      { title: "All Orders", url: "/dashboard/ADMIN/orders" },
-      { title: "New Order", url: "/dashboard/ADMIN/orders/new" },
+      { title: "All Items", url: "/dashboard/ADMIN/inventory" },
+      { title: "New Item", url: "/dashboard/ADMIN/inventory/new" },
     ],
   },
   {

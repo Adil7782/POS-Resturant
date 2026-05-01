@@ -50,7 +50,7 @@ export async function POST(
             maxAge: MAX_AGE,
             path: "/",
         });
-        console.log("user data", existingUserByEmail)
+        // console.log("user data", existingUserByEmail)
 
 
         return NextResponse.json(
