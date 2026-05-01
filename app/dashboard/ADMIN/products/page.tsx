@@ -38,6 +38,7 @@ export default async function ProductsPage() {
     }));
     const categories = await prisma.category.findMany();
 
+
     // Group by category
     // const categories = Array.from(new Set(products.map(p => p.category)));
 

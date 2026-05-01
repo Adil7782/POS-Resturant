@@ -11,6 +11,7 @@ const createProductSchema = z.object({
   description: z.string().optional(),
   sku: z.string().optional(),
   active: z.boolean().default(true),
+  tracked: z.boolean().default(false),
 });
 
 export async function GET() {
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { name, categoryId, price, cost, description, sku, active } = parsed.data;
+  const { name, categoryId, price, cost, description, sku, active, tracked } = parsed.data;
 
   const category = await prisma.category.findUnique({ where: { id: categoryId } });
   if (!category) {
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
   }
 
   const product = await prisma.product.create({
-    data: { name, categoryId, price, cost, description, sku: sku || null, active },
+    data: { name, categoryId, price, cost, description, sku: sku || null, active, isInventoryTracked: tracked },
     include: { category: true },
   });
 

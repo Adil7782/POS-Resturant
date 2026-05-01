@@ -4,7 +4,9 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Aadhi\\\\Desktop\\\\ADil\\\\pos\\\\resturant-pos\" -Recurse -Directory)",
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Select-Object -First 30)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Aadhi\\\\Desktop\\\\ADil\\\\pos\\\\resturant-pos\\\\app\\\\api\" -Recurse -File | ForEach-Object { $_.FullName })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Aadhi\\\\Desktop\\\\ADil\\\\pos\\\\resturant-pos\\\\app\\\\api\" -Recurse -File | ForEach-Object { $_.FullName })",
+      "Bash(cd /d \"C:\\\\Users\\\\Aadhi\\\\Desktop\\\\ADil\\\\pos\\\\resturant-pos\")",
+      "Bash(findstr /R /N \"parseInt\" \"app\\\\api\\\\**\\\\route.ts\")"
     ]
   }
 }

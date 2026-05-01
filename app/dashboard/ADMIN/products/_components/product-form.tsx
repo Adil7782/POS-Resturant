@@ -38,6 +38,7 @@ const productSchema = z.object({
   description: z.string().optional(),
   sku: z.string().optional(),
   active: z.boolean().default(true),
+  tracked: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -63,6 +64,7 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
         description: initialData.description || "",
         sku: initialData.sku || "",
         active: initialData.active,
+        tracked: initialData.isInventoryTracked,
       }
       : {
         name: "",
@@ -72,6 +74,7 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
         description: "",
         sku: "",
         active: true,
+        tracked: false,
       },
   });
 
@@ -85,6 +88,7 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
         description: initialData.description ?? "",
         sku: initialData.sku ?? "",
         active: initialData.active,
+        tracked: initialData.isInventoryTracked,
       });
     }
   }, [initialData]);
@@ -142,7 +146,7 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
                 <FormControl>
                   <Input
                     type="number"
-                    step="0.01"
+                    step="100"
                     disabled={isLoading}
                     {...field}
                   />
@@ -161,7 +165,7 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
                 <FormControl>
                   <Input
                     type="number"
-                    step="0.01"
+                    step="100"
                     disabled={isLoading}
                     {...field}
                   />
@@ -231,9 +235,32 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
           )}
         />
 
+        {initialData && (
+          <FormField
+            control={form.control}
+            name="active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    disabled={isLoading}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel>Active</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    This product is visible in the POS and available for sale.
+                  </p>
+                </div>
+              </FormItem>
+            )}
+          />)
+        }
         <FormField
           control={form.control}
-          name="active"
+          name="tracked"
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
@@ -244,9 +271,9 @@ export default function ProductForm({ initialData, categories, onSuccess }: Prod
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
-                <FormLabel>Active</FormLabel>
+                <FormLabel>Add to inventory</FormLabel>
                 <p className="text-sm text-muted-foreground">
-                  This product is visible in the POS and available for sale.
+                  Track the stock of this product.
                 </p>
               </div>
             </FormItem>

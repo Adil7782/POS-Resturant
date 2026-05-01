@@ -11,6 +11,7 @@ const updateProductSchema = z.object({
   description: z.string().optional(),
   sku: z.string().optional(),
   active: z.boolean().optional(),
+  tracked: z.boolean().optional(),
 });
 
 export async function PUT(
@@ -42,7 +43,7 @@ export async function PUT(
     return NextResponse.json({ message: "Product not found" }, { status: 404 });
   }
 
-  const { categoryId, sku, ...rest } = parsed.data;
+  const { categoryId, sku, tracked, ...rest } = parsed.data;
 
   if (categoryId) {
     const category = await prisma.category.findUnique({ where: { id: categoryId } });
@@ -64,6 +65,7 @@ export async function PUT(
       ...rest,
       ...(categoryId ? { categoryId } : {}),
       ...(sku !== undefined ? { sku: sku || null } : {}),
+      isInventoryTracked: tracked,
     },
     include: { category: true },
   });
