@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Aadhi\\\\Desktop\\\\ADil\\\\pos\\\\resturant-pos\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Select-Object -First 30)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Aadhi\\\\Desktop\\\\ADil\\\\pos\\\\resturant-pos\\\\app\\\\api\" -Recurse -File | ForEach-Object { $_.FullName })"
+    ]
+  }
+}
