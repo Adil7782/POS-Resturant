@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma';
 import ProductsTable from './_components/products-table';
 
 import { ProductDialog } from './_components/product-mini-form';
+import { BulkUploadButton } from '@/components/bulk-upload-button';
 import { getUserFromToken } from '@/lib/getuser';
 
 export const metadata = {
@@ -49,7 +50,10 @@ export default async function ProductsPage() {
             <h1 className="text-3xl font-bold">Products</h1>
             <p className="text-muted-foreground mt-2">View and manage menu items</p>
           </div>
-          <ProductDialog categories={categories} />
+          <div className="flex items-center gap-2">
+            <BulkUploadButton />
+            <ProductDialog categories={categories} />
+          </div>
         </div>
 
         <ProductsTable products={products} categories={categories} />

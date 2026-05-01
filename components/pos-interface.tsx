@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,16 +37,23 @@ export default function POSInterface({ products, userId }: POSInterfaceProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // Auto-focus search on mount
+  useEffect(() => {
+    searchRef.current?.focus();
+  }, []);
+
   // Get unique categories
   const categories = useMemo(() => {
-    ``
     return ['All', ...Array.from(new Set(products.map(p => p.category)))];
   }, [products]);
 
   // Filter products based on search and category 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const q = searchTerm.toLowerCase();
+      const matchesSearch = product.name.toLowerCase().includes(q) || (product.sku?.toLowerCase().includes(q) ?? false);
       const matchesCategory = !selectedCategory || selectedCategory === 'All' || product.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -143,6 +150,7 @@ export default function POSInterface({ products, userId }: POSInterfaceProps) {
         <div className="flex items-center gap-2">
           <Search className="w-4 h-4 text-muted-foreground" />
           <Input
+            ref={searchRef}
             placeholder="Search products..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -151,16 +159,25 @@ export default function POSInterface({ products, userId }: POSInterfaceProps) {
         </div>
 
         {/* Category Tabs */}
-        <Tabs value={selectedCategory || 'All'} onValueChange={setSelectedCategory}>
-          <TabsList className="w-full justify-start">
+        <div className="mb-10">  <Tabs value={selectedCategory || 'All'} onValueChange={setSelectedCategory}>
+          {/* Remove the overflow-x-auto and w-max wrappers */}
+          <TabsList className="flex flex-wrap h-auto gap-2 bg-transparent justify-start">
             {categories.map(cat => (
-              <TabsTrigger key={cat} value={cat}>{cat}</TabsTrigger>
+              <TabsTrigger
+                key={cat}
+                value={cat}
+                // Remove whitespace-nowrap so long text can wrap, 
+                // and ensure it looks like a button/chip
+                className="data-[state=active]:bg-primary data-[state=active]:text-white border shadow-sm"
+              >
+                {cat}
+              </TabsTrigger>
             ))}
           </TabsList>
-        </Tabs>
+        </Tabs></div>
 
         {/* Products Grid */}
-        <ScrollArea className="h-[calc(100vh-320px)]">
+        <ScrollArea className="h-[calc(100vh-340px)]">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pr-4">
             {filteredProducts.map(product => (
               <button
@@ -170,6 +187,7 @@ export default function POSInterface({ products, userId }: POSInterfaceProps) {
               >
                 <h3 className="font-semibold text-sm truncate">{product.name}</h3>
                 <p className="text-xs text-muted-foreground">{product.category}</p>
+                <p className="text-xs text-muted-foreground">{product.sku}</p>
                 <p className="text-lg font-bold mt-2 text-primary">Rs.{product.price.toFixed(2)}</p>
               </button>
             ))}

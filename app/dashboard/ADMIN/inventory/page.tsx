@@ -29,7 +29,6 @@ const page = async ({
 
     const page = Number(searchParams.page) || 0;
     const pageSize = Number(searchParams.pageSize) || 10;
-    console.log(inventory)
     return (
         <div>
             <DataTable
