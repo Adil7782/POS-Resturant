@@ -24,6 +24,7 @@ import {
   ClipboardListIcon,
   UserCircleIcon,
   ReceiptIcon,
+  ForkKnifeCrossedIcon,
 } from "lucide-react"
 
 const adminNav = [
@@ -31,37 +32,23 @@ const adminNav = [
     title: "Dashboard",
     url: "/dashboard/ADMIN",
     icon: <LayoutDashboardIcon />,
-    isActive: true,
-    items: [
-      { title: "Overview", url: "/dashboard/ADMIN" },
-    ],
   },
   {
     title: "Inventory",
-    url: "#",
+    url: "/dashboard/ADMIN/inventory",
     icon: <ShoppingCartIcon />,
-    items: [
-      { title: "All Items", url: "/dashboard/ADMIN/inventory" },
-      { title: "New Item", url: "/dashboard/ADMIN/inventory/new" },
-    ],
+
   },
   {
-    title: "Menu",
-    url: "#",
+    title: "Products",
+    url: "/dashboard/ADMIN/products",
     icon: <UtensilsIcon />,
-    items: [
-      { title: "Items", url: "/dashboard/ADMIN/menu" },
-      { title: "Categories", url: "/dashboard/ADMIN/menu/categories" },
-    ],
   },
   {
     title: "Users",
-    url: "#",
+    url: "/dashboard/ADMIN/users",
     icon: <UsersIcon />,
-    items: [
-      { title: "All Users", url: "/dashboard/ADMIN/users" },
-      { title: "Add User", url: "/dashboard/ADMIN/users/new" },
-    ],
+
   },
   {
     title: "Reports",
@@ -76,38 +63,22 @@ const adminNav = [
 
 const cashierNav = [
   {
-    title: "Dashboard",
+    title: "POS",
     url: "/dashboard/cashier/pos",
     icon: <ReceiptIcon />,
-    isActive: true,
-    items: [
-      { title: "POS", url: "/dashboard/cashier/pos" },
-    ],
-  },
-  {
-    title: "Orders",
-    url: "#",
-    icon: <ClipboardListIcon />,
-    items: [
-      { title: "My Orders", url: "/dashboard/cashier/orders" },
-      { title: "Order History", url: "/dashboard/cashier/orders/history" },
-    ],
   },
   {
     title: "Profile",
-    url: "#",
+    url: "/dashboard/cashier/profile",
     icon: <UserCircleIcon />,
-    items: [
-      { title: "My Account", url: "/dashboard/cashier/profile" },
-    ],
   },
 ]
 
 const teams = [
   {
-    name: "Restaurant POS",
-    logo: <GalleryVerticalEndIcon />,
-    plan: "Enterprise",
+    name: "Ganeesha Family ",
+    logo: <ForkKnifeCrossedIcon />,
+    plan: "Restaurant",
   },
 ]
 
