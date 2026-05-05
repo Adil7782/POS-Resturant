@@ -52,12 +52,9 @@ const adminNav = [
   },
   {
     title: "Reports",
-    url: "#",
+    url: "/dashboard/ADMIN/reports",
     icon: <BarChart3Icon />,
-    items: [
-      { title: "Sales", url: "/dashboard/ADMIN/reports/sales" },
-      { title: "Daily Summary", url: "/dashboard/ADMIN/reports/daily" },
-    ],
+
   },
 ]
 
